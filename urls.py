@@ -5,6 +5,10 @@ from django.conf.urls.defaults import patterns, include, url
 # admin.autodiscover()
 
 urlpatterns = patterns('',
+    (r'^$', 'ads.views.default'),
+    #(r'^video/(?P<format>\w+)/?', 'jobslist.views.serve_video_list'),
+    (r'^video/$', 'ads.views.serve_video_list'),
+    (r'^video/(?P<imei>\d+)/(?P<lat>[\d.]+)/(?P<lon>[\d.]+)', 'ads.views.get_video_list'),
     # Examples:
     # url(r'^$', 'icad.views.home', name='home'),
     # url(r'^icad/', include('icad.foo.urls')),

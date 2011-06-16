@@ -72,3 +72,29 @@ class SectionTest(TestCase):
         here = {'lat':100.0, 'lon':200.0}
         wheres = Section.objects.raw(self.query, [here['lat'], here['lon']])
         self.assertEqual(self.secru,wheres[0])
+
+class VideoTest(TestCase):
+
+    def setUp(self):
+        self.c = Client()
+
+    def test_serve_video_list(self):
+        response = self.c.get('/video/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_video_list_by_device(self):
+        tagh = Device.objects.create(imei = '355195000000017',
+                model = 'S710e', lat = 25.0392, lon = 121.4)
+        self.assertEqual(tagh.model, "S710e")
+        response = self.c.get('/video/%s/%f/%f' \
+                % (tagh.imei, tagh.lat, tagh.lon))
+        self.assertEqual(response.status_code, 200)
+        print response
+        #response = self.c.post(self.signup_url, self.register)
+        #self.assertEqual(response.status_code, 200)
+        #self.assertEqual(len(User.objects.all()), 0)
+        #response = self.c.post(url, {'new_password1' : 'abc123def',
+        #    'new_password2' : 'abc123def'})
+        #self.user = User.objects.get(username=self.user.username)
+        #self.assertEqual(self.user.check_password('abcd'),False)
+        #self.assertEqual(self.user.check_password('abc123def'),True)

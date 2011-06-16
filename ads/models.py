@@ -22,6 +22,7 @@ class Video(models.Model):
     name = models.CharField( max_length = 255 )
     tags = models.TextField()
     url = models.CharField( max_length = 255)
+    thumbnail = models.CharField( max_length = 255)
 
 class Section(models.Model):
     name = models.CharField( max_length = 255)
