@@ -1,7 +1,4 @@
 from django.db import models
-from djangotoolbox.fields import ListField
-from djangotoolbox.fields import EmbeddedModelField
-from django_mongodb_engine.contrib import MongoDBManager
 
 class Point(models.Model):
     lat = models.FloatField()
@@ -13,7 +10,8 @@ class Device(models.Model):
     model = models.CharField( max_length = 10 )
     phone_number = models.CharField( max_length = 15)
     email = models.EmailField()
-    loc = EmbeddedModelField(Point)
+    lat = models.FloatField()
+    lon = models.FloatField()
     description = models.TextField()
 
     def __unicode__(self):
@@ -22,21 +20,14 @@ class Device(models.Model):
 class Video(models.Model):
     create_on = models.DateTimeField(auto_now_add=True, null=True)
     name = models.CharField( max_length = 255 )
-    tags = ListField()
+    tags = models.TextField()
     url = models.CharField( max_length = 255)
 
 class Section(models.Model):
     name = models.CharField( max_length = 255)
-    tags = ListField()
-    loc = EmbeddedModelField(Point)
+    tags = models.TextField()
+    lat = models.FloatField()
+    lon = models.FloatField()
 
-    objects = MongoDBManager()
-    class MongoMeta:
-        from pymongo import GEO2D
-        index_together = [('loc', GEO2D )]
-
-class Place(models.Model):
-    location = EmbeddedModelField(Point)
-
-    objects = MongoDBManager()
-
+    def __unicode__(self):
+        return "%s(%f,%f)" % (self.name, self.lat, self.lon)

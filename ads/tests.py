@@ -22,7 +22,7 @@ class DeviceTest(TestCase):
     def test_basic_creation(self):
         sinica = Point.objects.create(lat = 25.0392, lon = 121.5250)
         tagh = Device.objects.create(imei = '355195000000017',
-                model = 'S710e', loc = sinica)
+                model = 'S710e', lat = sinica.lat, lon = sinica.lon)
         self.assertEqual(tagh.model, "S710e")
 
 class SectionTest(TestCase):
@@ -31,35 +31,42 @@ class SectionTest(TestCase):
 #        self.tagh = Device.objects.create(imei = '355195000000017',
 #                model = 'S710e', loc = htc)
         # Right Up
-        self.mlru = Point.objects.create(lat = 24.975531, lon = 121.327479)
+        #self.mlru = Point.objects.create(lat = 24.975531, lon = 121.327479)
         # Left Up
-        self.mllu = Point.objects.create(lat = 24.975449, lon = 121.327321)
+        #self.mllu = Point.objects.create(lat = 24.975449, lon = 121.327321)
         # Left Down
-        self.mlld = Point.objects.create(lat = 24.975356, lon = 121.327398)
+        #self.mlld = Point.objects.create(lat = 24.975356, lon = 121.327398)
         # Right Down
-        self.mlrd = Point.objects.create(lat = 24.975395, lon = 121.327510)
-        self.secru = Section.objects.create(name="RU", loc = self.mlru)
-        self.seclu = Section.objects.create(name="LU", loc = self.mllu)
-        self.secld = Section.objects.create(name="LD", loc = self.mlld)
-        self.secrd = Section.objects.create(name="RD", loc = self.mlrd)
-        from django.db import connections
-        print connections
-        db_wrapper = connections['default']
-        print db_wrapper.get_collection('section').index_information
-        section = db_wrapper.get_collection('section')
-        from pymongo import GEO2D
-#        index_together = [('loc', GEO2D )]
-#        db.eval('db.section.ensureIndex( { loc : "2d" } )')
-#        cursor = connections.cursor()
-        #cursor.execute('db.section.ensureIndex( { loc : "2d" } )')
-#        print Point.objects.ensure_index([( 'loc', "2d")])
+        #self.mlrd = Point.objects.create(lat = 24.975395, lon = 121.327510)
+        self.mlru = Point.objects.create(lat = 11.0, lon = 10.0)
+        self.mllu = Point.objects.create(lat = 0.0, lon = 10.0)
+        self.mlld = Point.objects.create(lat = 0.3, lon = 0.0)
+        self.mlrd = Point.objects.create(lat = 10.0, lon = 0.5)
+        self.secru = Section.objects.create(name="RU", lat = self.mlru.lat,
+                lon = self.mlru.lon)
+        self.seclu = Section.objects.create(name="LU", lat = self.mllu.lat,
+                lon = self.mllu.lon)
+        self.secld = Section.objects.create(name="LD", lat = self.mlld.lat,
+                lon = self.mlld.lon)
+        self.secrd = Section.objects.create(name="RD", lat = self.mlrd.lat,
+                lon = self.mlrd.lon)
         #print Section.objects.raw('ensureIndex({ loc : "2d" }')
 
-    def test_outside_sections(self):
-        abc = Point.objects.all()
-#        Point.objects.ensuerIndex({ loc : "2d" })
-        here = {'lat':24.975048, 'lon':121.327136}
-        where = Section.objects.raw_query({'loc' : {'$near' : here}})
-        print where
-        self.assertEqual(self.secrd,where)
+    def test_intside_sections(self):
+        here = {'lat':1.0, 'lon':0.0}
+        #where = Section.objects.raw_query({'loc' : {'$near' : here}})
+        #print where
+#        query = "SELECT ((lat) + (lon)) as \
+#            distance, ads_section.* FROM ads_section ORDER BY distance ASC" 
+        query = "SELECT (abs(lat - %s) + abs(lon - %s)) as \
+            distance, ads_section.* FROM ads_section ORDER BY distance ASC \
+            LIMIT 10"
+        wheres = Section.objects.raw(query, [here['lat'], here['lon']])
+        self.assertEqual(self.secld,wheres[0])
 
+        here = {'lat':6.0, 'lon':4.0}
+        query = "SELECT (abs(lat - %s) + abs(lon - %s)) as \
+            distance, ads_section.* FROM ads_section ORDER BY distance ASC \
+            LIMIT 10"
+        wheres = Section.objects.raw(query, [here['lat'], here['lon']])
+        self.assertEqual(self.secrd,wheres[0])
