@@ -11,8 +11,10 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django_mongodb_engine',
-        'NAME': 'icad_db',                      # Or path to database file if using sqlite3.
+#        'ENGINE': 'django_mongodb_engine',
+#        'NAME': 'icad_db',                      # Or path to database file if using sqlite3.
+        'ENGINE': 'sqlite3',
+        'NAME': 'icad.db',                      # Or path to database file if using sqlite3.
     }
 }
 
@@ -111,6 +113,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'icad.ads',
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
