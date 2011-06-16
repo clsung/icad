@@ -50,23 +50,25 @@ class SectionTest(TestCase):
                 lon = self.mlld.lon)
         self.secrd = Section.objects.create(name="RD", lat = self.mlrd.lat,
                 lon = self.mlrd.lon)
-        #print Section.objects.raw('ensureIndex({ loc : "2d" }')
-
-    def test_intside_sections(self):
-        here = {'lat':1.0, 'lon':0.0}
-        #where = Section.objects.raw_query({'loc' : {'$near' : here}})
-        #print where
-#        query = "SELECT ((lat) + (lon)) as \
-#            distance, ads_section.* FROM ads_section ORDER BY distance ASC" 
-        query = "SELECT (abs(lat - %s) + abs(lon - %s)) as \
+        self.query = "SELECT (abs(lat - %s) + abs(lon - %s)) as \
             distance, ads_section.* FROM ads_section ORDER BY distance ASC \
             LIMIT 10"
-        wheres = Section.objects.raw(query, [here['lat'], here['lon']])
+        #print Section.objects.raw('ensureIndex({ loc : "2d" }')
+
+    def test_inside_sections(self):
+        here = {'lat':1.0, 'lon':0.0}
+        wheres = Section.objects.raw(self.query, [here['lat'], here['lon']])
         self.assertEqual(self.secld,wheres[0])
 
         here = {'lat':6.0, 'lon':4.0}
-        query = "SELECT (abs(lat - %s) + abs(lon - %s)) as \
-            distance, ads_section.* FROM ads_section ORDER BY distance ASC \
-            LIMIT 10"
-        wheres = Section.objects.raw(query, [here['lat'], here['lon']])
+        wheres = Section.objects.raw(self.query, [here['lat'], here['lon']])
         self.assertEqual(self.secrd,wheres[0])
+
+    def test_outside_sections(self):
+        here = {'lat':-1.0, 'lon':0.0}
+        wheres = Section.objects.raw(self.query, [here['lat'], here['lon']])
+        self.assertEqual(self.secld,wheres[0])
+
+        here = {'lat':100.0, 'lon':200.0}
+        wheres = Section.objects.raw(self.query, [here['lat'], here['lon']])
+        self.assertEqual(self.secru,wheres[0])
